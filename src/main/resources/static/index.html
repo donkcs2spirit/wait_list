@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Telegram Wait List</title>
+    <link rel="icon" type="image/png" href="/bingo.png">
+
+    <style>
+        body {
+            margin: 0;
+            font-family: Arial, sans-serif;
+            background: #0f172a;
+            color: white;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+        }
+
+        .card {
+            background: #1e293b;
+            padding: 40px;
+            border-radius: 20px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.4);
+            text-align: center;
+            width: 360px;
+        }
+
+        h1 {
+            margin-top: 0;
+        }
+
+        input {
+            width: 100%;
+            padding: 12px;
+            border-radius: 10px;
+            border: none;
+            margin-top: 15px;
+            font-size: 16px;
+        }
+
+        button {
+            width: 100%;
+            padding: 12px;
+            margin-top: 15px;
+            border-radius: 10px;
+            border: none;
+            background: #22c55e;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+
+        button:hover {
+            background: #16a34a;
+        }
+
+        .count {
+            margin-top: 20px;
+            font-size: 20px;
+        }
+    </style>
+</head>
+<body>
+
+<div class="card">
+    <img src="bingo.png" alt="Wait List" width="128" height="128">
+    <h1>Wait List</h1>
+    <p>Enter your Telegram ID</p>
+
+    <input id="telegram" placeholder="@username">
+
+    <button onclick="join()">Join</button>
+
+    <div class="count">
+        Participants: <span id="count">0</span>
+    </div>
+</div>
+
+<script>
+    async function updateCount() {
+        const res = await fetch("/count");
+        const data = await res.json();
+        document.getElementById("count").innerText = data.count;
+    }
+
+    function isValidTelegram(username) {
+        const regex = /^@[a-zA-Z0-9_]{4,31}$/;
+
+        if (!regex.test(username)) return false;
+
+        if (username.endsWith("_")) return false;
+
+        return true;
+    }
+
+    async function join() {
+        const tg = document.getElementById("telegram").value.trim();
+
+        if (!tg) {
+            alert("Enter your Telegram ID");
+            return;
+        }
+
+        if (!isValidTelegram(tg)) {
+            alert("Invalid Telegram username\nExample: @username");
+            return;
+        }
+
+        const res = await fetch("/join", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+                "Accept": "application/json"
+            },
+            body: JSON.stringify({ telegram: tg })
+        });
+
+        const data = await res.json();
+
+        if (data.error) {
+            alert("You are already participating");
+        } else {
+            alert("You are in the wait list");
+            document.getElementById("telegram").value = "";
+            updateCount();
+        }
+    }
+
+    updateCount();
+</script>
+
+</body>
+</html>
