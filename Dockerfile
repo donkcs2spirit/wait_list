@@ -1,8 +1,17 @@
+# ---------- STAGE 1: Build ----------
+FROM gradle:8-jdk21 AS builder
+
+WORKDIR /app
+COPY . .
+
+RUN gradle build --no-daemon
+
+# ---------- STAGE 2: Run ----------
 FROM eclipse-temurin:21-jre
 
 WORKDIR /app
 
-COPY build/libs/*.jar app.jar
+COPY --from=builder /app/build/libs/*.jar app.jar
 
 EXPOSE 8080
 
