@@ -51,6 +51,20 @@ fun Application.configureRouting() {
                 call.respond(mapOf("count" to rs.getInt("count")))
             }
         }
+
+        get("/show/all/participants") {
+
+            Database.connect().use { conn ->
+                val rs = conn.createStatement().executeQuery("SELECT telegram FROM users")
+                val users = mutableListOf<String>()
+
+                while (rs.next()) {
+                    users.add(rs.getString("telegram"))
+                }
+
+                call.respond(users)
+            }
+        }
     }
 }
 
