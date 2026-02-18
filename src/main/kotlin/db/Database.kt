@@ -5,21 +5,27 @@ import java.sql.DriverManager
 
 object Database {
 
-    private const val url = "jdbc:sqlite:database.db"
+    private val jdbcUrl: String by lazy {
+        System.getenv("DATABASE_URL")
+            ?: error("DATABASE_URL not set")
+    }
 
     init {
+        Class.forName("org.postgresql.Driver")
+
         connect().use { conn ->
-            conn.createStatement().execute(
+            conn.createStatement().executeUpdate(
                 """
                 CREATE TABLE IF NOT EXISTS users (
-                    id INTEGER PRIMARY KEY AUTOINCREMENT,
-                    telegram TEXT UNIQUE
+                    id SERIAL PRIMARY KEY,
+                    telegram TEXT UNIQUE NOT NULL
                 );
-                """
+                """.trimIndent()
             )
         }
     }
 
-    fun connect(): Connection =
-        DriverManager.getConnection(url)
+    fun connect(): Connection {
+        return DriverManager.getConnection(jdbcUrl)
+    }
 }
