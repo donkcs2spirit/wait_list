@@ -5,7 +5,8 @@ import java.sql.DriverManager
 
 object Database {
 
-    private val jdbcUrl: String by lazy {
+
+    private val jdbcUrl by lazy {
         System.getenv("DATABASE_URL")
             ?: error("DATABASE_URL not set")
     }
@@ -26,6 +27,12 @@ object Database {
     }
 
     fun connect(): Connection {
-        return DriverManager.getConnection(jdbcUrl)
+        val user = System.getenv("DATABASE_USER")
+            ?: error("DATABASE_USER not set")
+
+        val password = System.getenv("DATABASE_PASSWORD")
+            ?: error("DATABASE_PASSWORD not set")
+
+        return DriverManager.getConnection(jdbcUrl, user, password)
     }
 }
